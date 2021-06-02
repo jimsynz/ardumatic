@@ -1,0 +1,6 @@
+return {
+  default = {
+    output = "htest",
+    verbose = true
+  }
+}
