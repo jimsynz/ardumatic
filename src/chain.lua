@@ -18,19 +18,19 @@ function Chain:add(joint_or_body)
   local length = #self._chain
 
   if length == 0 then
-    local body = Object.check_type(joint_or_body, Body)
-    assert(body, "Chain root must be a body")
-    table.insert(self._chain, body)
+    Object.assert_type(joint_or_body, Body)
+    assert(joint_or_body, "Chain root must be a body")
+    table.insert(self._chain, joint_or_body)
 
   elseif math.fmod(length, 2) == 0 then
-    local body = Object.check_type(joint_or_body, Body)
-    assert(body, "Expected next item in chain to be a body")
-    table.insert(self._chain, body)
+    Object.assert_type(joint_or_body, Body)
+    assert(joint_or_body, "Expected next item in chain to be a body")
+    table.insert(self._chain, joint_or_body)
 
   else
-    local joint = Joint.coerce_type(joint_or_body)
-    assert(joint, "Expected next item in chain to be a joint")
-    table.insert(self._chain, joint)
+    Object.assert_type(joint_or_body, Joint)
+    assert(joint_or_body, "Expected next item in chain to be a joint")
+    table.insert(self._chain, joint_or_body)
   end
 
   return self
