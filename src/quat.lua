@@ -2,8 +2,9 @@
   Quaternions.
 ]]
 local math = require("math")
-local Quat = {}
+local Object = require("object")
 local Vec3
+local Quat
 
 local add = function(self, other)
   return Quat.new(self.x + other.x, self.y + other.y, self.z + other.z, self.w + other.w)
@@ -17,6 +18,7 @@ local mul = function(self, other)
   if type(other) == "number" then
     return Quat.new(self.x * other, self.y * other, self.z * other, self.w * other)
   else
+    Object.assert_type(other, Quat)
     return self:multiply_without_normalize(other):normalize()
   end
 end
@@ -34,22 +36,15 @@ local div = function(self, other)
   end
 end
 
-local mt = {
-  __index = Quat,
+Quat = Object.new("Quat", {}, {
   __add = add,
   __sub = sub,
   __mul = mul,
   __div = div
-}
+})
 
 function Quat.new(x, y, z, w)
-  local quat = {x = x or 0, y = y or 0, z = z or 0, w = w or 0}
-  setmetatable(quat, mt)
-  return quat
-end
-
-function Quat.is_quat(quat)
-  return quat.x and quat.y and quat.z and quat.w
+  return Object.instance({x = x or 0, y = y or 0, z = z or 0, w = w or 0}, Quat)
 end
 
 function Quat.zero()
@@ -82,6 +77,8 @@ function Quat:normalize()
 end
 
 function Quat:multiply_without_normalize(other)
+  Object.assert_type(other, Quat)
+
   Vec3 = Vec3 or require("vec3")
   local v1 = Vec3.new(self.x, self.y, self.z)
   local v1a = v1 * self.w
@@ -93,6 +90,8 @@ function Quat:multiply_without_normalize(other)
 end
 
 function Quat:dot(other)
+  Object.assert_type(other, Quat)
+
   return self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
 end
 
@@ -112,6 +111,10 @@ function Quat:normalize_sign()
 end
 
 function Quat:angle(v1, v2)
+  Vec3 = Vec3 or require("vec3")
+  Object.assert_type(v1, Vec3)
+  Object.assert_type(v2, Vec3)
+
   local denominator = 1.0 / v1:length() / v2:length()
   local cos_a = v1:dot(v2) * denominator
 
@@ -128,6 +131,10 @@ function Quat:angle(v1, v2)
 end
 
 function Quat:angle_normalized_vectors(v1, v2)
+  Vec3 = Vec3 or require("vec3")
+  Object.assert_type(v1, Vec3)
+  Object.assert_type(v2, Vec3)
+
   local cos_a = v1:dot(v2)
   if (cos_a >= -1.0 and cos_a <= 1.0) then
     local v3 = v1:cross(v2)

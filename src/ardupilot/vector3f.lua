@@ -4,20 +4,27 @@
 ]]
 local math = require("math")
 local string = require("string")
-local Vector3f = {}
+local Object = require("object")
+local Vector3f
 
-local mt = {
+Vector3f = Object.new("Vector3f", {
+  x = Object.accessor("x"),
+  y = Object.accessor("y"),
+  z = Object.accessor("z")
+},{
   __add = function(self, other)
+    Object.assert_type(other, Vector3f)
     return Vector3f.new(self:x() + other:x(), self:y() + other:y(), self:z() + other:z())
   end,
   __sub = function(self, other)
+    Object.assert_type(other, Vector3f)
     return Vector3f.new(self:x() - other:x(), self:y() - other:y(), self:z() - other:z())
   end,
-  __index = Vector3f,
   __tostring = function(self)
     return string.format("Vector3f{x = %f, y = %f, z = %f}", self:x(), self:y(), self:z())
   end
-}
+})
+
 
 local is_nan = function(n)
   return type(n) == "number" and n ~= n
@@ -28,33 +35,7 @@ local is_inf = function(n)
 end
 
 function Vector3f.new(x, y, z)
-  local vec = {_x = x or 0, _y = y or 0, _z = z or 0}
-  setmetatable(vec, mt)
-  return vec
-end
-
-function Vector3f:x(x)
-  if x then
-    return Vector3f.new(x, self:y(), self:z())
-  else
-    return self._x
-  end
-end
-
-function Vector3f:y(y)
-  if y then
-    return Vector3f.new(self:x(), y, self:z())
-  else
-    return self._y
-  end
-end
-
-function Vector3f:z(z)
-  if z then
-    return Vector3f.new(self:x(), self:y(), z)
-  else
-    return self._z
-  end
+  return Object.instance({_x = x, _y = y, _z = z}, Vector3f, mt)
 end
 
 function Vector3f:length()

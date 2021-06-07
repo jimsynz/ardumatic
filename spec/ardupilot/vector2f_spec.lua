@@ -1,4 +1,5 @@
 require "busted.runner"
+local Object = require("object")
 local Vector2f = require "ardupilot.vector2f"
 
 describe("Vector2f", function()

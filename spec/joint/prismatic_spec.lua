@@ -1,0 +1,20 @@
+require "busted.runner"
+local PrismaticJoint = require("joint.prismatic")
+local TranslationLimit = require("limit.translation")
+local Object = require("object")
+
+describe("PrismaticJoint.new", function()
+  it("creates a new PrismaticJoint instance", function()
+    local translation_limit = TranslationLimit.new(0, 0)
+    local joint = PrismaticJoint.new(translation_limit)
+    Object.assert_type(joint, PrismaticJoint)
+  end)
+end)
+
+describe("PrismaticJoint:dof", function()
+  it("is 1", function()
+    local translation_limit = TranslationLimit.new(0, 0)
+    local joint = PrismaticJoint.new(translation_limit)
+    assert.are.equal(joint.dof, 1)
+  end)
+end)
