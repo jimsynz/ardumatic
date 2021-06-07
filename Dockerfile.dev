@@ -1,0 +1,64 @@
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND="noninteractive" TZ=Pacific/Auckland
+
+# Install basic dependencies
+RUN apt-get -q -y update && \
+  apt-get -q -y --no-install-recommends install autoconf automake \
+  bash build-essential bzip2 ca-certificates curl dpkg-dev file \
+  g++ gcc git-core imagemagick libbz2-dev libc6-dev libdb-dev libevent-dev \
+  libffi-dev libgdbm-dev libglib2.0-dev libgmp-dev libjpeg-dev libkrb5-dev \
+  liblzma-dev libmagickcore-dev libmagickwand-dev libmaxminddb-dev \
+  libncurses-dev libncurses5-dev libncursesw5-dev libpng-dev libpq-dev \
+  libreadline-dev libsctp-dev libsqlite3-dev libssl-dev libtool libwebp-dev \
+  libxml2-dev libxslt-dev libyaml-dev locales make make mercurial patch python \
+  unixodbc-dev unzip wget xz-utils zlib1g-dev zsh && \
+  apt-get -q -y clean
+
+RUN locale-gen en_NZ.UTF-8
+ENV LANG en_NZ.UTF-8
+ENV LANGUAGE en_NZ:en
+ENV LC_ALL en_NZ.UTF-8
+
+WORKDIR /root/
+
+# Install oh-my-zsh
+RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Install ASDF
+ARG ASDF_VERSION=0.8.1
+RUN git clone https://github.com/asdf-vm/asdf.git /root/.asdf --branch v${ASDF_VERSION} && \
+  echo '\nsource $HOME/.asdf/asdf.sh' >> ~/.bashrc && \
+  echo '\nsource $HOME/.asdf/asdf.sh' >> ~/.zshrc
+
+WORKDIR /app/
+
+# Optionally copy the .tool-versions file to the container.
+COPY .tool-versions* /app/
+RUN touch .tool-versions
+
+# Install Lua
+ARG DEFAULT_LUA_VERSION=5.4.3
+RUN /bin/bash -c 'source ~/.asdf/asdf.sh && \
+  asdf plugin add lua && \
+  LUA_VERSION=$(grep "^lua " .tool-versions | cut -d" " -f2) && \
+  LUA_VERSION=${LUA_VERSION:-${DEFAULT_LUA_VERSION}} && \
+  echo "Installing Lua ${LUA_VERSION}" && \
+  asdf install lua ${LUA_VERSION} && \
+  asdf global lua ${LUA_VERSION}'
+
+
+RUN sh -c 'EP=/root/entrypoint.sh && \
+  echo \#!/bin/bash > $EP && \
+  echo source /root/.asdf/asdf.sh >> $EP && \
+  echo export DOCKER=true >> $EP && \
+  echo exec \"\$@\" >> $EP && \
+  chmod 755 $EP'
+
+COPY spec /app/spec
+COPY src /app/src
+ADD .busted *.rockspec /app/
+WORKDIR /app
+
+ENTRYPOINT [ "/root/entrypoint.sh" ]
+CMD ["lua"]
