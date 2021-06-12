@@ -13,16 +13,13 @@ build = {
   modules = {
     ["angle"] = "src/angle.lua",
     ["body"] = "src/body.lua",
+    ["body.limb"] = "src/body/limb.lua",
+    ["ardupilot.vector3f"] = "src/ardupilot/vector3f.lua",
     ["joint"] = "src/joint.lua",
-    ["joint.prismatic"] = "src/joint/prismatic.lua",
-    ["joint.revolute"] = "src/joint/revolute.lua",
-    ["limit.rotation"] = "src/limit/rotation.lua",
-    ["limit.translation"] = "src/limit/translation.lua",
+    ["link"] = "src/link.lua",
     ["object"] = "src/object.lua",
-    ["quat"] = "src/quat.lua",
+    ["scalar"] = "src/scalar.lua",
     ["vec3"] = "src/vec3.lua",
-    ["ardupilot.vector2f"] = "src/ardupilot/vector2f.lua",
-    ["ardupilot.vector3f"] = "src/ardupilot/vector3f.lua"
   }
 }
 test_dependencies = {

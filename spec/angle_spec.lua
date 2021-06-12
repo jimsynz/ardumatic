@@ -27,7 +27,7 @@ describe("Angle.from_degrees", function()
   end)
 end)
 
-describe("Angle.normalize", function()
+describe("Angle:normalize", function()
   local angle
 
   describe("when the angle as a multiple rotation radian", function()

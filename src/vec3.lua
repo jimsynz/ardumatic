@@ -3,6 +3,7 @@
 ]]
 local string = require("string")
 local Object = require("object")
+local Scalar = require("scalar")
 local Quat
 local Vector3f = _G["Vector3f"] or require("ardupilot.vector3f")
 local Vec3
@@ -28,7 +29,7 @@ local generate_logical = function(operation)
   end
 end
 
-Vec3 = Object.new("Vec3", {}, {
+Vec3 = Object.new("Vec3", {
   __add = generate_operation("add"),
   __sub = generate_operation("sub"),
   __mul = generate_operation("mul"),
@@ -37,7 +38,7 @@ Vec3 = Object.new("Vec3", {}, {
   __lt = generate_logical(function(a, b) return a < b end),
   __le = generate_logical(function(a, b) return a <= b end),
   __tostring = function(self)
-    return string.format("Vec3{x=%q,y=%q,z=%q}", self:x(), self:y(), self:z())
+    return string.format("Vec3{x=%f,y=%f,z=%f}", self:x(), self:y(), self:z())
   end
 })
 
@@ -70,69 +71,49 @@ function Vec3:z()
   return self._vector3f:z()
 end
 
+function Vec3:is_zero()
+  return self._vector3f:is_zero()
+end
+
 function Vec3:add_number(other)
-  if type(other) == "number" then
-    return Vec3.new(self:x() + other, self:y() + other, self:z() + other)
-  else
-    return nil, "Expected argument to be a number"
-  end
+  Scalar.assert_type(other, "number")
+  return Vec3.new(self:x() + other, self:y() + other, self:z() + other)
 end
 
 function Vec3:add_vec3(other)
-  if other.class == Vec3 then
-    return Vec3.from_vector3f(self._vector3f + other._vector3f)
-  else
-    return nil, "Expected argument to be Vec3"
-  end
+  Object.assert_type(other, Vec3)
+  return Vec3.from_vector3f(self._vector3f + other._vector3f)
 end
 
 function Vec3:sub_number(other)
-  if type(other) == "number" then
-    return Vec3.new(self:x() - other, self:y() - other, self:z() - other)
-  else
-    return nil, "Expected argument to be a number"
-  end
+  Scalar.assert_type(other, "number")
+  return Vec3.new(self:x() - other, self:y() - other, self:z() - other)
 end
 
 function Vec3:sub_vec3(other)
-  if other.class == Vec3 then
-    return Vec3.from_vector3f(self._vector3f - other._vector3f)
-  else
-    return nil, "Expected argument to be Vec3"
-  end
+  Object.assert_type(other, Vec3)
+  return Vec3.from_vector3f(self._vector3f - other._vector3f)
 end
 
 function Vec3:mul_number(other)
-  if type(other) == "number" then
-    return Vec3.new(self:x() * other, self:y() * other, self:z() * other)
-  else
-    return nil, "Expected argument to be a number"
-  end
+  Scalar.assert_type(other, "number")
+  return Vec3.new(self:x() * other, self:y() * other, self:z() * other)
 end
 
 function Vec3:mul_vec3(other)
-  if other.class == Vec3 then
-    return Vec3.new(self:x() * other:x(), self:y() * other:y(), self:z() * other:z())
-  else
-    return nil, "Expected argument to be Vec3"
-  end
+  Object.assert_type(other, Vec3)
+  return Vec3.new(self:x() * other:x(), self:y() * other:y(), self:z() * other:z())
 end
 
 
 function Vec3:div_number(other)
-  if type(other) == "number" then
-    return Vec3.new(self:x() / other, self:y() / other, self:z() / other)
-  else
-    return nil, "Expected argument to be a number"
-  end
+  Scalar.assert_type(other, "number")
+  return Vec3.new(self:x() / other, self:y() / other, self:z() / other)
 end
 
 function Vec3:div_vec3(other)
-  if other.class == Vec3 then
-    return Vec3.new(self:x() / other:x(), self:y() / other:y(), self:z() / other:z())
-  else
-    return nil, "Expected argument to be Vec3"
-  end
+  Object.assert_type(other, Vec3)
+  return Vec3.new(self:x() / other:x(), self:y() / other:y(), self:z() / other:z())
 end
 
 function Vec3:normalize()
@@ -140,20 +121,16 @@ function Vec3:normalize()
 end
 
 function Vec3:dot(other)
-  if other.class == Vec3 then
-    return self:x() * other:x() + self:y() * other:y() + self:z() * other:z()
-  end
-  return nil, "Argument is not a Vec3"
+  Object.assert_type(other, Vec3)
+  return self:x() * other:x() + self:y() * other:y() + self:z() * other:z()
 end
 
 function Vec3:cross(other)
-  if other.class == Vec3 then
-    local x = self:y() * other:z() - self:z() * other:y()
-    local y = self:z() * other:x() - self:x() * other:z()
-    local z = self:x() * other:y() - self:y() * other:x()
-    return Vec3.new(x, y, z)
-  end
-  return nil, "Argument is not a Vec3"
+  Object.assert_type(other, Vec3)
+  local x = self:y() * other:z() - self:z() * other:y()
+  local y = self:z() * other:x() - self:x() * other:z()
+  local z = self:x() * other:y() - self:y() * other:x()
+  return Vec3.new(x, y, z)
 end
 
 function Vec3:length_squared()
@@ -163,15 +140,6 @@ end
 function Vec3:length()
   -- return math.sqrt(self:length_squared())
   return self._vector3f:length()
-end
-
-function Vec3:rotate(quat)
-  Quat = Quat or require "quat"
-  Object.assert_type(quat, Quat)
-  local point = Quat.new(self:x(), self:y(), self:z(), 0.0)
-  local conj = quat:conj()
-
-  return quat:multiply_without_normalize(point):multiply_without_normalize(conj)
 end
 
 return Vec3

@@ -25,12 +25,12 @@ local generate_logical = function(operation)
     if self._rad then
       return operation(self._rad, other:radians())
     else
-      return operation(self._def, other:degrees())
+      return operation(self._deg, other:degrees())
     end
   end
 end
 
-Angle = Object.new("Angle", {}, {
+Angle = Object.new("Angle", {
   __add = generate_infix(function(a, b) return a + b end),
   __sub = generate_infix(function(a, b) return a - b end),
   __mul = generate_infix(function(a, b) return a * b end),

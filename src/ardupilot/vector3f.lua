@@ -8,10 +8,6 @@ local Object = require("object")
 local Vector3f
 
 Vector3f = Object.new("Vector3f", {
-  x = Object.accessor("x"),
-  y = Object.accessor("y"),
-  z = Object.accessor("z")
-},{
   __add = function(self, other)
     Object.assert_type(other, Vector3f)
     return Vector3f.new(self:x() + other:x(), self:y() + other:y(), self:z() + other:z())
@@ -35,7 +31,7 @@ local is_inf = function(n)
 end
 
 function Vector3f.new(x, y, z)
-  return Object.instance({_x = x, _y = y, _z = z}, Vector3f, mt)
+  return Object.instance({_x = x, _y = y, _z = z}, Vector3f)
 end
 
 function Vector3f:length()
@@ -58,6 +54,10 @@ end
 function Vector3f:is_zero()
   return self:x() == 0 and self:y() == 0 and self:z() == 0
 end
+
+Vector3f.x = Object.accessor("x")
+Vector3f.y = Object.accessor("y")
+Vector3f.z = Object.accessor("z")
 
 return function()
   return Vector3f.new()

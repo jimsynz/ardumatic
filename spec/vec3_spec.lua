@@ -51,11 +51,12 @@ describe("Vec3.zero", function()
   for component, _ in pairs(default) do
     it("has a zero " .. component .. " component", function()
       assert.are.equal(0, vec[component](vec))
+
     end)
   end
 end)
 
-describe("Vec3.length", function()
+describe("Vec3:length", function()
   local vec
   before_each(function()
     vec = Vec3.new(default.x, default.y, default.z)
@@ -66,7 +67,7 @@ describe("Vec3.length", function()
   end)
 end)
 
-describe("Vec3.normalize", function()
+describe("Vec3:normalize", function()
   local vec
   before_each(function()
     vec = Vec3.new(default.x, default.y, default.z):normalize()
@@ -81,7 +82,7 @@ describe("Vec3.normalize", function()
   end
 end)
 
-describe("Vec3.dot", function()
+describe("Vec3:dot", function()
   local vec0, vec1
 
   before_each(function()
@@ -94,7 +95,7 @@ describe("Vec3.dot", function()
   end)
 end)
 
-describe("Vec3.cross", function()
+describe("Vec3:cross", function()
   local vec0, vec1
 
   before_each(function()
@@ -110,7 +111,7 @@ describe("Vec3.cross", function()
   end
 end)
 
-describe("Vec3.length_squared", function()
+describe("Vec3:length_squared", function()
   local vec
   before_each(function()
     vec = Vec3.new(default.x, default.y, default.z)
@@ -118,16 +119,5 @@ describe("Vec3.length_squared", function()
 
   it("calculates the correct value", function()
     assert.are.equal(default_length ^ 2, vec:length_squared())
-  end)
-end)
-
-describe("Vec3.length", function()
-  local vec
-  before_each(function()
-    vec = Vec3.new(default.x, default.y, default.z)
-  end)
-
-  it("calculates the correct value", function()
-    assert.are.equal(default_length, vec:length())
   end)
 end)

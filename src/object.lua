@@ -5,7 +5,7 @@ local type_of = function(self, class)
   return self.class == class
 end
 
-function Object.new(name, table, mt)
+function Object.new(name, mt, table)
   name = name or "Anonymous class"
   table = table or {}
   mt = mt or {}
@@ -21,6 +21,7 @@ function Object.new(name, table, mt)
 end
 
 function Object.instance(table, class)
+  assert(class, "You must provide a class to create an instance as")
   local metadata = getmetatable(class)
   local mt = metadata.mt or {}
   local intertable = {

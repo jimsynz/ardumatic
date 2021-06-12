@@ -20,11 +20,11 @@ describe("Object.instance", function()
 
   describe("when called with a table, class and metatable", function()
     before_each(function()
-      Example = Object.new("Example", Example, {
+      Example = Object.new("Example",  {
         __add = function(self, other)
           return self.value + other.value
         end
-      })
+      }, Example)
     end)
 
     it("creates a new instance of the class", function()

@@ -1,50 +1,62 @@
+local Chain = require("chain")
+local Frame = require("frame")
 local Object = require("object")
-local Body
+local Limb = require("body.limb")
+local Scalar = require("scalar")
+local Vec3 = require("vec3")
 
-local generate_infix = function(operation)
-  return function(self, other)
-    if Object.check_type(other, Body) then
-      return Body.new(operation(self.length, other.length))
-    elseif type(other) == "number" then
-      return Body.new(operation(self.length, other))
-    else
-      return nil, "Expected operand to be a Body or a number"
-    end
-  end
-end
+local Body = Object.new("Body")
 
-local generate_logical = function(operation)
-  return function(self, other)
-    if Object.check_type(other, Body) then
-      return operation(self.length, other.length)
-    elseif type(other) == "number" then
-      return operation(self.length, other)
-    else
-      return nil, "Expected operand to be a Body or a number"
-    end
-  end
-end
+--- Initialise a new Robot body.
+--
+-- The body is the root container of the robot.  It contains each chain (ie
+-- limb) and can optionally have a name to aid in debugging.
+--
+-- @param origin a Frame which defines the root coordinate of the body.
+-- @param name an optional string name, to aid in debugging.
+function Body.new(origin, name)
+  Object.assert_type(origin, Frame)
+  Scalar.assert_type(name, "string", true)
 
-Body = Object.new("Body", {}, {
-  __add = generate_infix(function(a, b) return a + b end),
-  __sub = generate_infix(function(a, b) return a - b end),
-  __mul = generate_infix(function(a, b) return a * b end),
-  __div = generate_infix(function(a, b) return a / b end),
-  __eq = generate_logical(function(a, b) return a == b end),
-  __lt = generate_logical(function(a, b) return a < b end),
-  __le = generate_logical(function(a, b) return a <= b end),
-  __tostring = function(self)
-    return string.format("Body{length = %f}", self.length)
-  end
-})
-
-function Body.new(length)
-  assert(type(length) == "number", "Must provide a body length")
-  assert(length > 0, "Body must have a length of more than zero")
   return Object.instance({
-    _length = length,
-    length = Object.reader("length")
+    _origin = origin,
+    _name = name,
+    _limbs = {}
   }, Body)
+end
+
+Body.name = Object.reader("name")
+Body.origin = Object.reader("origin")
+Body.Limb = Limb
+
+--- Attach a chain to the body.
+--
+-- @param offset the coordinates of the chain's root joint relative to the Body root.
+-- @param chain an instance of Chain
+-- @return an instance of Body.Limb
+function Body:attach_chain(offset, chain)
+  Object.assert_type(offset, Vec3)
+  Object.assert_type(chain, Chain)
+
+  local limb = Limb.new(offset, chain)
+  table.insert(self._limbs, limb)
+
+  return limb
+end
+
+--- Chain end locations
+--
+-- Return the end locations of all limbs attached to the body
+--
+-- @return list of Vec3.
+function Body:end_locations()
+  local end_locations = {}
+
+  for _, limb in ipairs(self._limbs) do
+    table.insert(end_locations, limb:end_location())
+  end
+
+  return end_locations
 end
 
 return Body
