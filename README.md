@@ -3,11 +3,13 @@
 Ardumatic is a small forward and inverse kinematics library suitable for use
 inside Ardupilot.
 
-It uses the [FABRIK]() algorithm to
+It uses the [FABRIK](https://doi.org/10.1016/j.gmod.2011.05.003) algorithm to
 get quickly generate inverse kinematic solutions.
 
 # TODO
- - Implement FABRIK solver
+ - ~~Implement FABRIK solver~~
+ - Enable joint constraints when solving
+ - Add keep-out zones and colission avoidance
  - Implement gait generator for n-legged robots
 
 # Thanks to

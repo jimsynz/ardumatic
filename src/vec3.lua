@@ -2,6 +2,7 @@
   A wrapper around ArduPilot's Vector3f vector which provides some extra functionality.
 ]]
 local string = require("string")
+local math = require("math")
 local Object = require("object")
 local Scalar = require("scalar")
 local Quat
@@ -140,6 +141,27 @@ end
 function Vec3:length()
   -- return math.sqrt(self:length_squared())
   return self._vector3f:length()
+end
+
+--- The (absolute) distance between self and other.
+function Vec3:distance(other)
+  Object.assert_type(other, Vec3)
+
+  return math.abs((self - other):length())
+end
+
+--- The direction from self towards other.
+--
+-- @return a unit vector
+function Vec3:direction(other)
+  Object.assert_type(other, Vec3)
+
+  return (other - self):normalize()
+end
+
+--- Invert the vector.
+function Vec3:invert()
+  return self * -1
 end
 
 return Vec3

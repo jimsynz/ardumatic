@@ -74,7 +74,7 @@ end
 -- @return a positive integer.
 function Chain:reach()
   local reach = 0
-  for _joint, part in self:pairs() do
+  for _joint, part in self:forward_pairs() do
     reach = reach + part:length()
   end
   return reach
@@ -120,6 +120,27 @@ function Chain:link_location(link_number)
   return link_location
 end
 
+--- Return the chain state for solving
+--
+-- @return a list of tables containing each joint, link length and current end position.
+function Chain:chain_state()
+  local current_location = Vec3.zero()
+  local results = {}
+
+  for joint, link in self:forward_pairs() do
+    local length = link:length()
+    local link_vector = joint:direction() * link:length()
+    current_location = current_location + link_vector
+    table.insert(results, {
+      joint = joint,
+      length = length,
+      end_location = current_location
+    })
+  end
+
+  return results
+end
+
 --- Iterate the chain parts from the root to the end
 --
 -- @return an iterator.
@@ -163,6 +184,10 @@ function Chain:backward_pairs()
     i = i - 1
     return joint, link
   end
+end
+
+function Chain:get(index)
+  return self._chain[index]
 end
 
 --- The name of the chain (if set)

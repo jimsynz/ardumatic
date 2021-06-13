@@ -15,9 +15,16 @@ local MAX_CONSTRAINT = Angle.from_degrees(180)
 local Joint = Object.new("Joint", {
   __tostring = function(self)
     if self._type == JointType.BALL then
-      return string.format("Joint{type=BALL,clockwise_constraint=%s}", self._clockwise_constraint)
+      return string.format(
+        "Joint{type=BALL,current_direction=%s,clockwise_constraint=%s}",
+        self._current_direction,
+        self._clockwise_constraint)
     else
-      return string.format("Join{type=HINGE,anticlockwise_constraint=%s,clockwise_constraint=%s}", self._anticlockwise_constraint, self._clockwise_constraint)
+      return string.format(
+        "Join{type=HINGE,current_direction=%s,anticlockwise_constraint=%s,clockwise_constraint=%s}",
+        self._current_direction,
+        self._anticlockwise_constraint,
+        self._clockwise_constraint)
     end
   end
 })
@@ -55,11 +62,14 @@ function Joint.ball(reference_axis, max_constraint)
   Object.assert_type(max_constraint, Angle, true)
   assert_valid_constraint(max_constraint, true)
 
+  reference_axis = reference_axis:normalize()
+
   return Object.instance({
     _type = JointType.BALL,
+    _current_direction = reference_axis,
     _anticlockwise_constraint = MIN_CONSTRAINT,
     _clockwise_constraint = max_constraint or MAX_CONSTRAINT,
-    _reference_axis = reference_axis:normalize()
+    _reference_axis = reference_axis
   }, Joint)
 end
 
@@ -97,12 +107,15 @@ function Joint.hinge(rotation_axis, reference_axis, clockwise_constraint, anticl
   assert(rotation_axis:dot(reference_axis) < Scalar.FLOAT_EPSILON,
     "The reference axis must be in the plane of the rotation axis")
 
+  reference_axis = reference_axis:normalize()
+
   return Object.instance({
     _type = JointType.HINGE,
+    _current_direction = reference_axis,
     _anticlockwise_constraint = anticlockwise_constraint,
     _clockwise_constraint = clockwise_constraint,
     _rotation_axis = rotation_axis:normalize(),
-    _reference_axis = reference_axis:normalize()
+    _reference_axis = reference_axis
   }, Joint)
 end
 
@@ -125,8 +138,14 @@ Joint.JointType = JointType
 Joint.type = Object.reader("type")
 
 --- The unit vector defining the joint's current direction.
-function Joint:direction()
-  return self._reference_axis
+function Joint:direction(new_direction)
+  if new_direction then
+    Object.assert_type(new_direction, Vec3)
+    self._current_direction = new_direction:normalize()
+    return self
+  else
+    return self._current_direction
+  end
 end
 
 return Joint

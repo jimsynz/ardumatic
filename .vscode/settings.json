@@ -1,5 +1,11 @@
 {
   "Lua.workspace.library": [
     "lua_modules"
+  ],
+  "Lua.diagnostics.globals": [
+    "describe",
+    "it",
+    "setup",
+    "before_each"
   ]
 }

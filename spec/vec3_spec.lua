@@ -121,3 +121,42 @@ describe("Vec3:length_squared", function()
     assert.are.equal(default_length ^ 2, vec:length_squared())
   end)
 end)
+
+describe("Vec3:distance", function()
+  local vecs = {
+    {Vec3.new(0, 0, 0), Vec3.new(10, 0, 0), 10},
+    {Vec3.new(0, 0, 0), Vec3.new(3,4, 0), 5},
+    {Vec3.new(40, 30, 0), Vec3.new(0, 0, 0), 50}
+  }
+
+  for _, example in ipairs(vecs) do
+    local left = example[1]
+    local right = example[2]
+    local expected = example[3]
+
+    describe("when the left-hand vector is " .. tostring(left) .. " and the right-hand vector is " .. tostring(right), function()
+      it("is " .. tostring(expected), function()
+        assert.are.equal(left:distance(right), expected)
+      end)
+    end)
+  end
+end)
+
+describe("Vec3:direction", function()
+  local vecs = {
+    {Vec3.new(0, 0, 0), Vec3.new(10, 0, 0), Vec3.new(1, 0, 0)},
+    {Vec3.new(0, 0, 0), Vec3.new(-1, -1, 0), Vec3.new(-0.70710678118654746172, -0.70710678118654746172, 0)}
+  }
+
+  for _, example in ipairs(vecs) do
+    local left = example[1]
+    local right = example[2]
+    local expected = example[3]
+
+    describe("when the left-hand vector is " .. tostring(left) .. " and the right-hand vector is " .. tostring(right), function()
+      it("is " .. tostring(expected), function()
+        assert.are.equal(left:direction(right), expected)
+      end)
+    end)
+  end
+end)
