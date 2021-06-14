@@ -27,14 +27,14 @@ describe("Angle.from_degrees", function()
   end)
 end)
 
-describe("Angle:normalize", function()
+describe("Angle:normalise", function()
   local angle
 
   describe("when the angle as a multiple rotation radian", function()
     before_each(function() angle = Angle.from_radians(6.5 * math.pi) end)
 
     it("normalises it within a single ratation", function()
-      local actual = angle:normalize():radians()
+      local actual = angle:normalise():radians()
       local expected = 0.5 * math.pi
       -- Thanks IEEE.
       assert.are.equal(string.format("%0.10f", actual), string.format("%0.10f", expected))
@@ -45,7 +45,7 @@ describe("Angle:normalize", function()
     before_each(function() angle = Angle.from_radians(-0.75 * math.pi) end)
 
     it("normalises it within a single ratation", function()
-      local actual = angle:normalize():radians()
+      local actual = angle:normalise():radians()
       local expected = 1.25 * math.pi
       -- Thanks IEEE.
       assert.are.equal(string.format("%0.10f", actual), string.format("%0.10f", expected))
@@ -56,7 +56,7 @@ describe("Angle:normalize", function()
     before_each(function() angle = Angle.from_degrees(6.5 * 360) end)
 
     it("normalises it within a single ratation", function()
-      local actual = angle:normalize():degrees()
+      local actual = angle:normalise():degrees()
       local expected = 180
       assert.are.equal(actual, expected)
     end)
@@ -66,7 +66,7 @@ describe("Angle:normalize", function()
     before_each(function() angle = Angle.from_degrees(-270) end)
 
     it("normalises it within a single ratation", function()
-      local actual = angle:normalize():degrees()
+      local actual = angle:normalise():degrees()
       local expected = 90
       assert.are.equal(actual, expected)
     end)

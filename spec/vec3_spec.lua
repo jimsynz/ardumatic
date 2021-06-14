@@ -1,4 +1,6 @@
 require "busted.runner"
+local Angle = require("angle")
+local Scalar = require("scalar")
 local Vec3 = require("vec3")
 local Vector3f = require("ardupilot.vector3f")
 local default = {x = 3, y = 4, z = 12}
@@ -67,10 +69,10 @@ describe("Vec3:length", function()
   end)
 end)
 
-describe("Vec3:normalize", function()
+describe("Vec3:normalise", function()
   local vec
   before_each(function()
-    vec = Vec3.new(default.x, default.y, default.z):normalize()
+    vec = Vec3.new(default.x, default.y, default.z):normalise()
   end)
 
   for component, value in pairs(default) do
@@ -156,6 +158,81 @@ describe("Vec3:direction", function()
     describe("when the left-hand vector is " .. tostring(left) .. " and the right-hand vector is " .. tostring(right), function()
       it("is " .. tostring(expected), function()
         assert.are.equal(left:direction(right), expected)
+      end)
+    end)
+  end
+end)
+
+describe("Vec3:angle_to", function()
+  local vecs = {
+    {Vec3.new(1, 0, 0), Vec3.new(0, 1, 0), Angle.from_degrees(90)},
+    {Vec3.new(1, 0, 0), Vec3.new(1, 1, 0), Angle.from_degrees(45)},
+    {Vec3.new(1, 0, 0), Vec3.new(1,0, 1), Angle.from_degrees(45)},
+    {Vec3.new(-1, 0, 0), Vec3.new(1,0, 0), Angle.from_degrees(180)},
+    {Vec3.new(-1, 0, 0), Vec3.new(1,0, -1), Angle.from_degrees(135)},
+  }
+
+  for _, example in ipairs(vecs) do
+    local left = example[1]:normalise()
+    local right = example[2]:normalise()
+    local expected = example[3]
+
+    describe("when the left-hand vector is " .. tostring(left) .. " and the right-hand vector is " .. tostring(right), function()
+      it("is " .. tostring(expected:degrees()) .. "º", function()
+        assert.are.near(left:angle_to(right):degrees(), expected:degrees(), Scalar.FLOAT_EPSILON)
+      end)
+    end)
+  end
+end)
+
+describe("Vec3:constrained_rotation_towards", function()
+  local vecs = {
+    {Vec3.new(1, 0, 0), Vec3.new(0, 1, 0), Angle.from_degrees(45), Angle.from_degrees(45)},
+    {Vec3.new(1, 0, 0), Vec3.new(0, 1, 0), Angle.from_degrees(270), Angle.from_degrees(90)},
+  }
+
+  for _, example in ipairs(vecs) do
+    local origin_axis = example[1]:normalise()
+    local target_axis = example[2]:normalise()
+    local constraint = example[3]
+    local expected = example[4]
+
+    describe(
+        "when the origin axis is " .. tostring(origin_axis)
+        .. " and the target axis is " .. tostring(target_axis)
+        .. " and it is constrained by " .. tostring(constraint:degrees()) .. "º", function()
+      it("it is rotated by " .. tostring(expected:degrees()) .. "º", function()
+        local constrained_axis = origin_axis:constrained_rotation_towards(target_axis, constraint)
+        local constrained_rotation = origin_axis:angle_to(constrained_axis)
+
+        assert.are.near(constrained_rotation:degrees(), expected:degrees(), Scalar.FLOAT_EPSILON)
+      end)
+    end)
+  end
+end)
+
+describe("Vec3:rotate_about_axis", function()
+  local vecs = {
+    {Vec3.new(1, 0, 0), Vec3.new(0, 1, 0), Angle.from_degrees(90), Vec3.new(0, 0, 1)},
+    {Vec3.new(1, 0, 0), Vec3.new(0, 0, 1), Angle.from_degrees(45), Vec3.new(1, -1, 0)}
+  }
+
+  for _, example in ipairs(vecs) do
+    local origin_axis = example[1]:normalise()
+    local rotation_axis = example[2]:normalise()
+    local rotation = example[3]
+    local expected = example[4]:normalise()
+
+    describe(
+        "when the origin axis is " .. tostring(origin_axis)
+        .. " and it is rotated by " .. tostring(rotation:degrees()) .. "º"
+        .. " around " .. tostring(rotation_axis), function()
+      it("it is rotated to " .. tostring(expected), function()
+        local result = origin_axis:rotate_about_axis(rotation_axis, rotation)
+
+        assert.are.near(result:x(), expected:x(), Scalar.FLOAT_EPSILON)
+        assert.are.near(result:y(), expected:y(), Scalar.FLOAT_EPSILON)
+        assert.are.near(result:z(), expected:z(), Scalar.FLOAT_EPSILON)
       end)
     end)
   end

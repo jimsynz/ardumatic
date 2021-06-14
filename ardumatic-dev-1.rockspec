@@ -19,6 +19,7 @@ build = {
     ["fabrik"] = "src/fabrik.lua",
     ["joint"] = "src/joint.lua",
     ["link"] = "src/link.lua",
+    ["mat3"] = "src/mat3.lua",
     ["object"] = "src/object.lua",
     ["scalar"] = "src/scalar.lua",
     ["vec3"] = "src/vec3.lua",

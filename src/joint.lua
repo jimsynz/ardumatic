@@ -62,7 +62,7 @@ function Joint.ball(reference_axis, max_constraint)
   Object.assert_type(max_constraint, Angle, true)
   assert_valid_constraint(max_constraint, true)
 
-  reference_axis = reference_axis:normalize()
+  reference_axis = reference_axis:normalise()
 
   return Object.instance({
     _type = JointType.BALL,
@@ -107,14 +107,14 @@ function Joint.hinge(rotation_axis, reference_axis, clockwise_constraint, anticl
   assert(rotation_axis:dot(reference_axis) < Scalar.FLOAT_EPSILON,
     "The reference axis must be in the plane of the rotation axis")
 
-  reference_axis = reference_axis:normalize()
+  reference_axis = reference_axis:normalise()
 
   return Object.instance({
     _type = JointType.HINGE,
     _current_direction = reference_axis,
     _anticlockwise_constraint = anticlockwise_constraint,
     _clockwise_constraint = clockwise_constraint,
-    _rotation_axis = rotation_axis:normalize(),
+    _rotation_axis = rotation_axis:normalise(),
     _reference_axis = reference_axis
   }, Joint)
 end
@@ -141,7 +141,7 @@ Joint.type = Object.reader("type")
 function Joint:direction(new_direction)
   if new_direction then
     Object.assert_type(new_direction, Vec3)
-    self._current_direction = new_direction:normalize()
+    self._current_direction = new_direction:normalise()
     return self
   else
     return self._current_direction

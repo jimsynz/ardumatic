@@ -38,7 +38,7 @@ function Vector3f:length()
   return math.sqrt((self:x() ^ 2) + (self:y() ^ 2) + (self:z() ^ 2))
 end
 
-function Vector3f:normalize()
+function Vector3f:normalise()
   local length = self:length()
   return Vector3f.new(self:x() / length, self:y() / length, self:z() / length)
 end

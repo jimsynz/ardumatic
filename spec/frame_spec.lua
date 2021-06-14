@@ -7,7 +7,7 @@ describe("Frame.new", function()
     local position, rotation
     before_each(function()
       position = Vec3.new(1,2,3)
-      rotation = Vec3.new(-3, -2, -1):normalize()
+      rotation = Vec3.new(-3, -2, -1):normalise()
     end)
 
     it("creates a frame instance", function()

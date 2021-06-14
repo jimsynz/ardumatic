@@ -49,7 +49,7 @@ Angle = Object.new("Angle", {
   end
 })
 
-local normalize_rad = function(rad)
+local normalise_rad = function(rad)
   local norm = math.fmod(rad, two_pi)
   if norm < 0 then
     return two_pi + norm
@@ -58,7 +58,7 @@ local normalize_rad = function(rad)
   end
 end
 
-local normalize_deg = function(deg)
+local normalise_deg = function(deg)
   local norm = math.fmod(deg, 360)
   if norm < 0 then
     return 360 + norm
@@ -98,15 +98,15 @@ function Angle:degrees()
   end
 end
 
-function Angle:normalize()
+function Angle:normalise()
   local rad, deg
   if self._rad and self._deg then
-    rad = normalize_rad(self._rad)
+    rad = normalise_rad(self._rad)
     deg = math.deg(rad)
   elseif self._rad then
-    rad = normalize_rad(self._rad)
+    rad = normalise_rad(self._rad)
   elseif self._deg then
-    deg = normalize_deg(self._deg)
+    deg = normalise_deg(self._deg)
   end
   return Object.instance({_rad = rad, _deg = deg}, Angle)
 end

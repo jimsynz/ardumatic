@@ -22,7 +22,7 @@ function Frame.new(rotation, position)
 
   return Object.instance({
     position = position or Vec3.zero(),
-    rotation = rotation:normalize()
+    rotation = rotation:normalise()
   }, Frame)
 end
 

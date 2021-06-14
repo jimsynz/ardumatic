@@ -96,7 +96,7 @@ describe("FABRIK.solve", function()
 
       assert.are.equal(iterations, 0)
 
-      local expected_direction = target:normalize()
+      local expected_direction = target:normalise()
 
       for joint, _ in chain:forward_pairs() do
         local direction = joint:direction()

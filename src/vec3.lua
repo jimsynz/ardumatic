@@ -3,10 +3,11 @@
 ]]
 local string = require("string")
 local math = require("math")
+local Angle = require("angle")
 local Object = require("object")
 local Scalar = require("scalar")
-local Quat
 local Vector3f = _G["Vector3f"] or require("ardupilot.vector3f")
+local Mat3
 local Vec3
 
 local generate_operation = function(operation)
@@ -117,20 +118,30 @@ function Vec3:div_vec3(other)
   return Vec3.new(self:x() / other:x(), self:y() / other:y(), self:z() / other:z())
 end
 
-function Vec3:normalize()
-  return Vec3.from_vector3f(self._vector3f:normalize())
+function Vec3:normalise()
+  return Vec3.from_vector3f(self._vector3f:normalise())
 end
 
 function Vec3:dot(other)
   Object.assert_type(other, Vec3)
+
   return self:x() * other:x() + self:y() * other:y() + self:z() * other:z()
 end
 
 function Vec3:cross(other)
   Object.assert_type(other, Vec3)
-  local x = self:y() * other:z() - self:z() * other:y()
-  local y = self:z() * other:x() - self:x() * other:z()
-  local z = self:x() * other:y() - self:y() * other:x()
+
+  local self_x = self:x()
+  local self_y = self:y()
+  local self_z = self:z()
+
+  local other_x = other:x()
+  local other_y = other:y()
+  local other_z = other:z()
+
+  local x = self_y * other_z - self_z * other_y
+  local y = self_z * other_x - self_x * other_z
+  local z = self_x * other_y - self_y * other_x
   return Vec3.new(x, y, z)
 end
 
@@ -156,12 +167,106 @@ end
 function Vec3:direction(other)
   Object.assert_type(other, Vec3)
 
-  return (other - self):normalize()
+  return (other - self):normalise()
 end
 
 --- Invert the vector.
 function Vec3:invert()
   return self * -1
+end
+
+--- The angle between two vectors
+--
+-- In order to calculate this both vectors have to be normalised into unit
+-- vectors.  If the vectors are not normalised before calling this you will get
+-- an invalid result.
+--
+-- @return an instance of Angle.
+function Vec3:angle_to(other)
+  Object.assert_type(other, Vec3)
+
+  local rads = math.acos(self:dot(other))
+  print("rads = " .. tostring(rads))
+  return Angle.from_radians(rads)
+end
+
+--- Constrained rotation
+--
+-- Calculate a vector that rotates self towards other without exceeding the
+-- constraint angle.  Particularly useful in ball joints.
+--
+-- In order to calculate this both vectors have to be normalised into unit
+-- vectors.  If the vectors are not normalised before calling this you will get
+-- an invalid result.
+--
+-- @param other direction to rotate towards (Vec3)
+-- @param constraint the maximum angle to rotate by
+-- @return a vector describing the target direction
+function Vec3:constrained_rotation_towards(other, constraint)
+  Object.assert_type(other, Vec3)
+  Object.assert_type(constraint, Angle)
+
+  local target_angle = self:angle_to(other)
+  if target_angle < constraint then
+    -- the target angle is within our constrained range of motion
+    return other
+
+  else
+    -- rotate towards other while applying a maximum angle constraint
+    local correction_axis = self:cross(other):normalise()
+    return self:rotate_about_axis(correction_axis, constraint)
+  end
+end
+
+--- Rotate about axis
+--
+-- In order to calculate this both vectors have to be normalised into unit
+-- vectors.  If the vectors are not normalised before calling this you will get
+-- an invalid result.
+--
+-- @param axis the axis around which to rotate
+-- @param rotation the clockwise angle to rotate
+function Vec3:rotate_about_axis(axis, rotation)
+  Object.assert_type(axis, Vec3)
+  Object.assert_type(rotation, Angle)
+
+  Mat3 = Mat3 or require("mat3")
+
+  -- precalculate a bunch of values to speed things up.
+  local axis_x = axis:x()
+  local axis_y = axis:y()
+  local axis_z = axis:z()
+  local theta = rotation:radians()
+  local sin_theta = math.sin(theta)
+  local cos_theta = math.cos(theta)
+  local one_minus_cos_theta = 1.0 - cos_theta
+  local xx_omcs = axis_x * axis_x * one_minus_cos_theta
+  local xy_omcs = axis_x * axis_y * one_minus_cos_theta
+  local xz_omcs = axis_x * axis_z * one_minus_cos_theta
+  local yy_omcs = axis_y * axis_y * one_minus_cos_theta
+  local yz_omcs = axis_y * axis_z * one_minus_cos_theta
+  local zz_omcs = axis_z * axis_z * one_minus_cos_theta
+
+  -- build a rotation matrix for our target angle
+  local rotation_matrix = Mat3.new({
+    -- rotated X axis
+    xx_omcs + cos_theta,
+    xy_omcs + axis_z * sin_theta,
+    xz_omcs - axis_y * sin_theta,
+
+    -- rotated Y axis
+    xy_omcs - axis_z * sin_theta,
+    yy_omcs + cos_theta,
+    yz_omcs + axis_x * sin_theta,
+
+    -- rotated Z axis
+    xz_omcs + axis_y * sin_theta,
+    yz_omcs - axis_x * sin_theta,
+    zz_omcs + cos_theta
+  })
+
+  -- rotate self by the rotation matrix
+  return rotation_matrix:mul_vec3(self)
 end
 
 return Vec3
