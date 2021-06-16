@@ -13,6 +13,7 @@ function LinkState.new(joint, link, root_location, tip_location)
 
   return Object.instance({
     joint = joint,
+    length = link:length(),
     link = link,
     root_location = root_location,
     tip_location = tip_location

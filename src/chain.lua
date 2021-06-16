@@ -1,18 +1,14 @@
 local Joint = require("joint")
-local Object = require("object")
 local Link = require("link")
+local LinkState = require("chain.link_state")
+local Object = require("object")
 local Scalar = require("scalar")
 local string = require("string")
-local Vec3 = require "vec3"
-
-local LastPart = {
-  LINK = 0,
-  JOINT = 1
-}
+local Vec3 = require("vec3")
 
 --- The Chain class
 --
--- Defines a chain of Joint and Link instances which define a robot limb.
+-- Defines a chain of joints and links which make a robot limb.
 local Chain = Object.new("Chain", {
   __tostring = function(self)
     if self._name then
@@ -32,9 +28,9 @@ function Chain.new(origin, name)
 
   return Object.instance({
     _chain = {},
-    _last_part = LastPart.LINK,
     _name = name,
-    _origin = origin or Vec3.zero()
+    _origin = origin or Vec3.zero(),
+    _reach = 0
   }, Chain)
 end
 
@@ -43,24 +39,28 @@ end
 -- This is the main interface for building your chain.  Use it to add Joints and
 -- Links to the end of the chain.
 --
--- Note that your chain should always start with a Joint and alternate between
--- Joints and Links from then on.
-function Chain:add(part)
-  if self._last_part == LastPart.JOINT then
-    Object.assert_type(part, Link)
-    table.insert(self._chain, part)
-    self._last_part = LastPart.LINK
+-- @param joint an instance of Joint
+-- @param link an instance of Link
+function Chain:add(joint, link)
+  Object.assert_type(joint, Joint)
+  Object.assert_type(link, Link)
 
-  elseif self._last_part == LastPart.LINK then
-    Object.assert_type(part, Joint)
-    table.insert(self._chain, part)
-    self._last_part = LastPart.JOINT
+  local root_location
+  if #self._chain > 0 then
+    root_location = self._chain[#self._chain].tip_location
+  else
+    root_location = self._origin
   end
+  local link_length = link:length()
+  local tip_location = root_location + (joint:direction() * link_length)
+  local link_state = LinkState.new(joint, link, root_location, tip_location)
 
+  table.insert(self._chain, link_state)
+  self._reach = self._reach + link_length
   return self
 end
 
---- The number of parts in the chain
+--- The number of links in the chain
 --
 -- Do not confuse this for the chain's reach.
 function Chain:length()
@@ -74,11 +74,7 @@ end
 --
 -- @return a positive integer.
 function Chain:reach()
-  local reach = 0
-  for _joint, part in self:forward_pairs() do
-    reach = reach + part:length()
-  end
-  return reach
+  return self._reach
 end
 
 --- The end-effector position.
@@ -86,68 +82,15 @@ end
 -- Calculates the position of the end effector given the current configuration
 -- of the joints.
 function Chain:end_location()
-  local end_location = self:origin()
-
-  for joint, link in self:forward_pairs() do
-    local link_vector = joint:direction() * link:length()
-    end_location = end_location + link_vector
+  local last_link = self._chain[#self._chain]
+  if last_link then
+    return last_link.tip_location
+  else
+    return self._origin
   end
-
-  return end_location
 end
 
---- Position at link end
---
--- Calculates the end position of link number provided.
--- @param link_number a positive integer explaining which part we're calculating
--- to.
-function Chain:link_location(link_number)
-  Scalar.assert_type(link_number, "integer")
-  assert(link_number > 0, "The part number must be greater than zero")
-  local link_count = math.floor(#self._chain / 2)
-  assert(link_number <= link_count, "The link number must be <= the number of links in the chain")
-
-  local link_location = Vec3.zero()
-  local count = 0
-  local iter = self:forward_pairs()
-
-  while count < link_number do
-    count = count + 1
-    local joint, link = iter()
-    local link_vector = joint:direction() * link:length()
-    link_location = link_location + link_vector
-  end
-
-  return link_location
-end
-
---- Return the chain state for solving
---
--- @return a list of tables containing each joint, link length and current end position.
-function Chain:chain_state()
-  local current_location = self:origin()
-  local results = {}
-
-  -- FIXME change this into an iterator so that we don't cause a
-  -- double-iteration
-
-  for joint, link in self:forward_pairs() do
-    local length = link:length()
-    local link_vector = joint:direction() * link:length()
-    local new_location = current_location + link_vector
-    table.insert(results, {
-      joint_location = current_location,
-      joint = joint,
-      length = length,
-      end_location = new_location
-    })
-    current_location = new_location
-  end
-
-  return results
-end
-
---- Iterate the chain parts from the root to the end
+--- Iterate the chain link states from the root to the end
 --
 -- @return an iterator.
 function Chain:forwards()
@@ -158,7 +101,7 @@ function Chain:forwards()
   end
 end
 
---- Iterate the chain parts from the end to the root
+--- Iterate the chain link states from the end to the root
 --
 -- @return an iterator.
 function Chain:backwards()
@@ -168,32 +111,6 @@ function Chain:backwards()
     i = i - 1
     return value
   end
-end
-
-function Chain:forward_pairs()
-  local i = 0
-  return function()
-    i = i + 1
-    local joint = self._chain[i]
-    i = i + 1
-    local link = self._chain[i]
-    return joint, link
-  end
-end
-
-function Chain:backward_pairs()
-  local i = #self._chain
-  return function()
-    local link = self._chain[i]
-    i = i - 1
-    local joint = self._chain[i]
-    i = i - 1
-    return joint, link
-  end
-end
-
-function Chain:get(index)
-  return self._chain[index]
 end
 
 --- The name of the chain (if set)

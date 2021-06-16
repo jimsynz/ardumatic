@@ -32,61 +32,43 @@ local merge_defaults = function(config)
 end
 
 -- recursively traverse the chain backwards and update the directions and
--- end_locations according to the solve.
-local solve_backwards
-solve_backwards = function(index, current_state, target)
-  local link_state = current_state[index]
+-- tip_locations according to the solve.
+local solve_backwards = function(chain, target)
+  for link_state in chain:backwards() do
+    -- calculate the direction from the target towards the inboard link.
+    local tip_to_root_direction = target:direction(link_state.root_location)
 
-  -- the inboard location is the end location of the inboard link, or zero.
-  local inboard_location
-  if index > 1 then
-    inboard_location = current_state[index - 1].end_location
-  else
-    inboard_location = Vec3.zero()
-  end
+    -- calculate the new end position of the inboard link.
+    local link_reverse_vector = tip_to_root_direction * link_state.length
+    local new_root_location = target + link_reverse_vector
 
-  -- calculate the direction from the target towards the inboard link.
-  local outer_to_inner_direction = target:direction(inboard_location)
-
-  -- calculate the new end position of the inboard link.
-  local link_reverse_vector = outer_to_inner_direction * link_state.length
-  local new_inboard_location = target + link_reverse_vector
-
-  -- update this joint's direction and end location.
-  -- the direction is set to the inverse of the outer_to_inner_direction because
-  -- the joint is at the link root.
-  local joint_direction = outer_to_inner_direction:invert()
-  link_state.joint:direction(joint_direction)
-  link_state.end_location = target
-
-  if index == 1 then
-    -- we've finished
-    return current_state
-  else
-    -- once more into the breach
-    return solve_backwards(index - 1, current_state, new_inboard_location)
+    -- update this joint's direction and end location.
+    -- the direction is set to the inverse of the tip_to_root_direction because
+    -- the joint is at the link root.
+    local joint_direction = tip_to_root_direction:invert()
+    link_state.joint:direction(joint_direction)
+    link_state.tip_location = target
+    link_state.root_location = new_root_location
+    target = new_root_location
   end
 end
 
-local solve_forwards
-solve_forwards = function(index, current_state, start_location, link_count)
-  local link_state = current_state[index]
+local solve_forwards = function(chain, start_location)
+  for link_state in chain:forwards() do
+    -- calculate the direction from the new start location towards the end location.
+    local root_to_tip_direction = start_location:direction(link_state.tip_location)
 
-  -- calculate the direction from the new start location towards the end location.
-  local inner_to_outer_direction = start_location:direction(link_state.end_location)
+    -- calculate the new tip position of this link.
+    local link_vector = root_to_tip_direction * link_state.length
+    local new_tip_location = start_location + link_vector
 
-  -- calculate the new end position of this link.
-  local link_vector = inner_to_outer_direction * link_state.length
-  local new_end_location = start_location + link_vector
 
-  -- update the joint's direction and the new end location.
-  link_state.joint:direction(inner_to_outer_direction)
-  link_state.end_location = new_end_location
+    -- update the joint's direction and the new tip location.
+    link_state.joint:direction(root_to_tip_direction)
+    link_state.root_location = start_location
+    link_state.tip_location = new_tip_location
 
-  if index == link_count then
-    return current_state
-  else
-    return solve_forwards(index + 1, current_state, new_end_location, link_count)
+    start_location = new_tip_location
   end
 end
 
@@ -146,24 +128,24 @@ function FABRIK.solve(chain, target, config)
   config = merge_defaults(config)
 
   local start_location = chain:origin()
-  local current_state = chain:chain_state(chain)
+  -- local current_state = chain:chain_state(chain)
 
   --
   if start_location:distance(target) > chain:reach() then
     local direction = start_location:direction(target)
 
-    for _, link_state in ipairs(current_state) do
-      local new_end_location =  start_location + (direction * link_state.length)
+    for link_state in chain:forwards() do
+      link_state.root_location = start_location
+      link_state.tip_location = start_location + (direction * link_state.length)
       link_state.joint:direction(direction)
-      link_state.end_location = new_end_location
-      start_location = new_end_location
+      start_location = link_state.tip_location
     end
 
     return 0
   end
 
-  local link_count = #current_state
-  local end_location = current_state[link_count].end_location
+  local link_count = chain:length()
+  local end_location = chain:end_location()
   local current_delta = target:distance(end_location)
 
   -- if we're already close enough to the target then we're g2g.
@@ -178,11 +160,11 @@ function FABRIK.solve(chain, target, config)
   repeat
     count = count + 1
 
-    current_state = solve_backwards(link_count, current_state, target)
-    current_state = solve_forwards(1, current_state, start_location, link_count)
+    solve_backwards(chain, target)
+    solve_forwards(chain, start_location)
 
     last_delta = current_delta
-    end_location = current_state[link_count].end_location
+    end_location = chain:end_location()
     current_delta = target:distance(end_location)
     delta_change = math.abs(current_delta - last_delta)
 

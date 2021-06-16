@@ -11,10 +11,8 @@ describe("FABRIK.solve", function()
 
   local function build_chain()
     return Chain.new()
-      :add(Joint.ball(Vec3.new(1, 0, 0)))
-      :add(Link.new(10))
-      :add(Joint.ball(Vec3.new(1, 0, 0)))
-      :add(Link.new(5))
+      :add(Joint.ball(Vec3.new(1, 0, 0)), Link.new(10))
+      :add(Joint.ball(Vec3.new(1, 0, 0)), Link.new(5))
   end
 
   describe("when the end effector is already at the target location", function()
@@ -25,9 +23,9 @@ describe("FABRIK.solve", function()
     end)
 
     it("doesn't change the chain state", function()
-      local before_state = chain:chain_state()
+      local before_state = chain
       FABRIK.solve(chain, target, config)
-      local after_state = chain:chain_state()
+      local after_state = chain
       assert.are.same(before_state, after_state)
     end)
   end)
@@ -40,9 +38,9 @@ describe("FABRIK.solve", function()
     end)
 
     it("doesn't change the chain state", function()
-      local before_state = chain:chain_state()
+      local before_state = chain
       FABRIK.solve(chain, target, config)
-      local after_state = chain:chain_state()
+      local after_state = chain
       assert.are.same(before_state, after_state)
     end)
   end)
@@ -98,8 +96,8 @@ describe("FABRIK.solve", function()
 
       local expected_direction = target:normalise()
 
-      for joint, _ in chain:forward_pairs() do
-        local direction = joint:direction()
+      for link_state in chain:forwards() do
+        local direction = link_state.joint:direction()
         assert.is.near(direction:x(), expected_direction:x(), Scalar.FLOAT_EPSILON)
         assert.is.near(direction:y(), expected_direction:y(), Scalar.FLOAT_EPSILON)
         assert.is.near(direction:y(), expected_direction:y(), Scalar.FLOAT_EPSILON)
