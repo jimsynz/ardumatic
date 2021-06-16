@@ -145,18 +145,18 @@ function FABRIK.solve(chain, target, config)
   Object.assert_type(target, Vec3)
   config = merge_defaults(config)
 
-  local start_location = Vec3.zero()
+  local start_location = chain:origin()
   local current_state = chain:chain_state(chain)
 
+  --
   if start_location:distance(target) > chain:reach() then
-    local starting_location = Vec3.zero()
-    local direction = starting_location:direction(target)
+    local direction = start_location:direction(target)
 
     for _, link_state in ipairs(current_state) do
-      local new_end_location =  starting_location + (direction * link_state.length)
+      local new_end_location =  start_location + (direction * link_state.length)
       link_state.joint:direction(direction)
       link_state.end_location = new_end_location
-      starting_location = new_end_location
+      start_location = new_end_location
     end
 
     return 0
@@ -179,7 +179,7 @@ function FABRIK.solve(chain, target, config)
     count = count + 1
 
     current_state = solve_backwards(link_count, current_state, target)
-    current_state = solve_forwards(1, current_state, Vec3.zero(), link_count)
+    current_state = solve_forwards(1, current_state, start_location, link_count)
 
     last_delta = current_delta
     end_location = current_state[link_count].end_location

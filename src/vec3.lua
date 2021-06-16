@@ -40,7 +40,37 @@ Vec3 = Object.new("Vec3", {
   __lt = generate_logical(function(a, b) return a < b end),
   __le = generate_logical(function(a, b) return a <= b end),
   __tostring = function(self)
-    return string.format("Vec3{x=%f,y=%f,z=%f}", self:x(), self:y(), self:z())
+    local self_x = self:x()
+    local self_y = self:y()
+    local self_z = self:z()
+
+    local format = "Vec3{x="
+
+    if Scalar.check_type(self_x, "integer") then
+      format = format .. "%d"
+    else
+      format = format .. "%f"
+    end
+
+    format = format .. ",y="
+
+    if Scalar.check_type(self_y, "integer") then
+      format = format .. "%d"
+    else
+      format = format .. "%f"
+    end
+
+    format = format .. ",z="
+
+    if Scalar.check_type(self_z, "integer") then
+      format = format .. "%d"
+    else
+      format = format .. "%f"
+    end
+
+    format = format .. "}"
+
+    return string.format(format, self_x, self_y, self_z)
   end
 })
 

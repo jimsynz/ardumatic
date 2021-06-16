@@ -4,7 +4,6 @@ local Link = require("link")
 local Scalar = require("scalar")
 local string = require("string")
 local Vec3 = require "vec3"
-local vector3f = require "src.ardupilot.vector3f"
 
 local LastPart = {
   LINK = 0,
@@ -17,9 +16,9 @@ local LastPart = {
 local Chain = Object.new("Chain", {
   __tostring = function(self)
     if self._name then
-      return string.format("Chain{name=%s,length=%d}", self._name, #self._chain)
+      return string.format("Chain{origin=%s,name=%s,length=%d}", self._origin, self._name, #self._chain)
     else
-      return string.format("Chain{length=%d}", #self._chain)
+      return string.format("Chain{origin=%s,length=%d}", self._origin, #self._chain)
     end
   end
 })
@@ -27,13 +26,15 @@ local Chain = Object.new("Chain", {
 --- Create an instance of Chain
 --
 -- @param name an optional name to aid with debugging.
-function Chain.new(name)
+function Chain.new(origin, name)
+  Object.assert_type(origin, Vec3, true)
   Scalar.assert_type(name, "string", true)
 
   return Object.instance({
     _chain = {},
+    _last_part = LastPart.LINK,
     _name = name,
-    _last_part = LastPart.LINK
+    _origin = origin or Vec3.zero()
   }, Chain)
 end
 
@@ -42,7 +43,7 @@ end
 -- This is the main interface for building your chain.  Use it to add Joints and
 -- Links to the end of the chain.
 --
--- Note that your chain should always start with a Joint and alternative between
+-- Note that your chain should always start with a Joint and alternate between
 -- Joints and Links from then on.
 function Chain:add(part)
   if self._last_part == LastPart.JOINT then
@@ -85,7 +86,7 @@ end
 -- Calculates the position of the end effector given the current configuration
 -- of the joints.
 function Chain:end_location()
-  local end_location = Vec3.zero()
+  local end_location = self:origin()
 
   for joint, link in self:forward_pairs() do
     local link_vector = joint:direction() * link:length()
@@ -124,18 +125,23 @@ end
 --
 -- @return a list of tables containing each joint, link length and current end position.
 function Chain:chain_state()
-  local current_location = Vec3.zero()
+  local current_location = self:origin()
   local results = {}
+
+  -- FIXME change this into an iterator so that we don't cause a
+  -- double-iteration
 
   for joint, link in self:forward_pairs() do
     local length = link:length()
     local link_vector = joint:direction() * link:length()
-    current_location = current_location + link_vector
+    local new_location = current_location + link_vector
     table.insert(results, {
+      joint_location = current_location,
       joint = joint,
       length = length,
-      end_location = current_location
+      end_location = new_location
     })
+    current_location = new_location
   end
 
   return results
@@ -192,5 +198,7 @@ end
 
 --- The name of the chain (if set)
 Chain.name = Object.reader("name")
+
+Chain.origin = Object.reader("origin")
 
 return Chain

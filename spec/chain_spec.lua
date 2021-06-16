@@ -10,8 +10,6 @@ describe("Chain.new", function()
   local chain
 
   before_each(function()
-    local position = Vec3.new(1, 1, 1)
-    local rotation = Vec3.new(0, 1,1)
     chain = Chain.new()
   end)
 

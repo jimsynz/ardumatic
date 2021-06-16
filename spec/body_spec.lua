@@ -50,15 +50,12 @@ describe("Body:attach_chain", function()
       :add(Joint.ball(Vec3.new(1, 0, 0)))
       :add(Link.new(10))
 
-      local offset = Vec3.new(5, 0, 0)
-      local limb = body:attach_chain(offset, chain)
 
-      Object.assert_type(limb, Body.Limb)
+    assert.is.equal(body:chain_count(), 0)
 
-      local end_location = limb:end_location()
-      assert.are.equal(end_location:x(), 25)
-      assert.are.equal(end_location:y(), 0)
-      assert.are.equal(end_location:z(), 0)
+    body:attach_chain(chain)
+
+    assert.is.equal(body:chain_count(), 1)
   end)
 end)
 
@@ -67,16 +64,16 @@ describe("Body:end_locations", function()
     local origin = Frame.new(Vec3.new(0, 0, 1))
     local body = Body.new(origin)
 
-    local left_leg = Chain.new()
+    local left_leg = Chain.new(Vec3.new(-5, 0, 0))
       :add(Joint.hinge(Vec3.new(0, 0, 1), Vec3.new(-1, 0, 0)))
       :add(Link.new(10))
 
-    local right_leg = Chain.new()
+    local right_leg = Chain.new(Vec3.new(5, 0, 0))
       :add(Joint.hinge(Vec3.new(0, 0, 1), Vec3.new(1, 0, 0)))
       :add(Link.new(10))
 
-    body:attach_chain(Vec3.new(-5, 0, 0), left_leg)
-    body:attach_chain(Vec3.new(5, 0, 0), right_leg)
+    body:attach_chain(left_leg)
+    body:attach_chain(right_leg)
 
     local end_locations = body:end_locations()
     local left_end_location = end_locations[1]
