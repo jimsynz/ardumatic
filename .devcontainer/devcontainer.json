@@ -15,7 +15,17 @@
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": []
+	"extensions": [
+		"ue.alphabetical-sorter",
+		"formulahendry.auto-close-tag",
+		"coenraads.bracket-pair-colorizer",
+		"deerawan.vscode-dash",
+		"stkb.rewrap",
+		"wmaurer.change-case",
+		"sumneko.lua",
+		"actboy168.lua-debug",
+		"christian-kohler.path-intellisense"
+	]
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
