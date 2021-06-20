@@ -1,5 +1,6 @@
 local Chain = require("chain")
 local Object = require("object")
+local Mat3 = require("mat3")
 local Vec3 = require("vec3")
 
 local FABRIK = Object.new("FABRIK")
@@ -29,6 +30,21 @@ local merge_defaults = function(config)
   end
 
   return config
+end
+
+local rotate_joint_with_constraints = function(joint, target_direction)
+  local reference_axis = joint:reference_axis()
+
+  if joint:is_ball() then
+    local constraint = joint:clockwise_constraint()
+    local new_direction = reference_axis:constrained_rotation_towards(target_direction, constraint)
+    joint:direction(new_direction)
+    return joint
+
+  elseif joint:is_hinge() then
+    local rotation_axis = joint:rotation_axis()
+
+  end
 end
 
 -- recursively traverse the chain backwards and update the directions and

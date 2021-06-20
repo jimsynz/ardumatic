@@ -17,7 +17,7 @@ describe("Joint.ball", function()
     end)
 
     it("sets the joint type to ball", function()
-      assert.are.equal(joint:type(), Joint.JointType.BALL)
+      assert.is_true(joint:is_ball())
     end)
 
     it("sets the anticlockwise constraint to 0º", function()
@@ -57,7 +57,7 @@ describe("Joint.ball", function()
     end)
 
     it("sets the joint type to ball", function()
-      assert.are.equal(joint:type(), Joint.JointType.BALL)
+      assert.is_true(joint:is_ball())
     end)
 
     it("sets the anticlockwise constraint to 0º", function()
@@ -88,7 +88,7 @@ describe("Joint.hinge", function()
     end)
 
     it("sets the joint type to ball", function()
-      assert.are.equal(joint:type(), Joint.JointType.HINGE)
+      assert.is_true(joint:is_hinge())
     end)
 
     it("sets the anticlockwise constraint to 180º", function()

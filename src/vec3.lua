@@ -299,4 +299,11 @@ function Vec3:rotate_about_axis(axis, rotation)
   return rotation_matrix:mul_vec3(self)
 end
 
+--- Project self into the plane
+function Vec3:project_on_plane(plane_normal)
+  local b = self:normalise()
+  local n = plane_normal:normalise()
+  return b:sub_vec3(n:mul_vec3(b:dot(plane_normal))):normalise()
+end
+
 return Vec3

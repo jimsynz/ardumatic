@@ -119,6 +119,18 @@ function Joint.hinge(rotation_axis, reference_axis, clockwise_constraint, anticl
   }, Joint)
 end
 
+--- Joint reference axis
+--
+-- @see Joint.ball and Joint.hinge
+-- @return a unit vector of the axis direction.
+Joint.reference_axis = Object.reader("reference_axis")
+
+--- Joint rotation axis
+--
+-- @see Joint.hinge
+-- @return a unit vector of the rotation axis or nil
+Joint.rotation_axis = Object.reader("rotation_axis")
+
 --- The maximum amount this joint is allowed to rotate anticlockwise.
 -- For ball joints, this is always zero.
 Joint.anticlockwise_constraint = Object.reader("anticlockwise_constraint")
@@ -131,11 +143,9 @@ Joint.anticlockwise_constraint = Object.reader("anticlockwise_constraint")
 -- value, so 180º means full rotation in either direction.
 Joint.clockwise_constraint = Object.reader("clockwise_constraint")
 
-Joint.JointType = JointType
-
 --- The type of hinge.
 -- Returns a value which can be compared with the JointType enum.
-Joint.type = Object.reader("type")
+-- Joint.type = Object.reader("type")
 
 --- The unit vector defining the joint's current direction.
 function Joint:direction(new_direction)
@@ -146,6 +156,14 @@ function Joint:direction(new_direction)
   else
     return self._current_direction
   end
+end
+
+function Joint:is_ball()
+  return self._type == JointType.BALL
+end
+
+function Joint:is_hinge()
+  return self._type == JointType.HINGE
 end
 
 return Joint

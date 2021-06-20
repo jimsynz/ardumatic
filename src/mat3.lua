@@ -26,6 +26,54 @@ function Mat3.new(values)
   }, Mat3)
 end
 
+function Mat3.zero()
+  return Object.instance({
+    m00 = 0.0,
+    m01 = 0.0,
+    m02 = 0.0,
+    m10 = 0.0,
+    m11 = 0.0,
+    m12 = 0.0,
+    m20 = 0.0,
+    m21 = 0.0,
+    m22 = 0.0,
+  }, Mat3)
+end
+
+function Mat3.rotation_matrix(reference_direction)
+  Object.assert_type(reference_direction, Vec3)
+  reference_direction = reference_direction:normalise()
+
+  local rm = Mat3.zero()
+
+  -- set Z basis
+  rm.m20 = reference_direction.x()
+  rm.m21 = reference_direction.y()
+  rm.m22 = reference_direction.z()
+
+  -- set X basis
+  if math.abs(reference_direction.y > 0.9999) then
+    rm.m00 = 1.0
+    rm.m01 = 0
+    rm.m02 = 0
+  else
+    local x_basis = reference_direction:cross(Vec3.new(0.0, 1.0, 0.0):normalise())
+    rm.m00 = x_basis.x()
+    rm.m01 = x_basis.y()
+    rm.m02 = x_basis.z()
+  end
+
+  -- set Y basis
+  local x_basis = Vec3.new(rm.m00, rm.m01, rm.m02)
+  local z_basis = Vec3.new(rm.m20, rm.m21, rm.m22)
+  local y_basis = x_basis:cross(z_basis):normalise()
+  rm.m10 = y_basis.x()
+  rm.m11 = y_basis.y()
+  rm.m12 = y_basis.z()
+
+  return rm
+end
+
 --- Multiply by Vec3
 --
 -- @param other Vec3
