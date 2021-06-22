@@ -12,7 +12,7 @@ function Object.new(name, mt, table)
   local metadata = {
     name = name,
     mt = mt,
-    __tostring = function(self)
+    __tostring = function()
       return string.format("Class{name = %q, id = %p}", name, table)
     end
   }
