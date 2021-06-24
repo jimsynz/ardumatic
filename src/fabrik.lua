@@ -32,20 +32,21 @@ local merge_defaults = function(config)
   return config
 end
 
-local rotate_joint_with_constraints = function(joint, target_direction)
-  local reference_axis = joint:reference_axis()
+--- WIP
+-- local rotate_joint_with_constraints = function(joint, target_direction)
+--   local reference_axis = joint:reference_axis()
 
-  if joint:is_ball() then
-    local constraint = joint:clockwise_constraint()
-    local new_direction = reference_axis:constrained_rotation_towards(target_direction, constraint)
-    joint:direction(new_direction)
-    return joint
+--   if joint:is_ball() then
+--     local constraint = joint:clockwise_constraint()
+--     local new_direction = reference_axis:constrained_rotation_towards(target_direction, constraint)
+--     joint:direction(new_direction)
+--     return joint
 
-  elseif joint:is_hinge() then
-    local rotation_axis = joint:rotation_axis()
+--   elseif joint:is_hinge() then
+--     local rotation_axis = joint:rotation_axis()
 
-  end
-end
+--   end
+-- end
 
 -- recursively traverse the chain backwards and update the directions and
 -- tip_locations according to the solve.
