@@ -11,7 +11,7 @@ RUN apt-get -q -y update && \
   liblzma-dev libmagickcore-dev libmagickwand-dev libmaxminddb-dev \
   libncurses-dev libncurses5-dev libncursesw5-dev libpng-dev libpq-dev \
   libreadline-dev libsctp-dev libsqlite3-dev libssl-dev libtool libwebp-dev \
-  libxml2-dev libxslt-dev libyaml-dev locales make make mercurial patch python \
+  libxml2-dev libxslt-dev libyaml-dev locales make make mercurial patch python3 \
   unixodbc-dev unzip wget xz-utils zlib1g-dev zsh && \
   apt-get -q -y clean
 
