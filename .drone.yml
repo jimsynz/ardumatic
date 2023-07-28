@@ -1,0 +1,200 @@
+kind: pipeline
+type: docker
+name: build
+
+steps:
+- name: restore ASDF cache
+  image: meltwater/drone-cache
+  pull: "always"
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: SECRET_ACCESS_KEY
+    AWS_PLUGIN_PATH_STYLE: true
+  settings:
+    restore: true
+    endpoint:
+      from_secret: S3_ENDPOINT
+    bucket:
+      from_secret: CACHE_BUCKET
+    region: us-east-1
+    path-style: true
+    cache_key: 'asdf-{{ os }}-{{ arch }}-{{ checksum ".tool-versions" }}'
+    mount:
+    - .asdf
+
+- name: restore build cache
+  image: meltwater/drone-cache
+  pull: "always"
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: SECRET_ACCESS_KEY
+    AWS_PLUGIN_PATH_STYLE: true
+  settings:
+    restore: true
+    endpoint:
+      from_secret: S3_ENDPOINT
+    bucket:
+      from_secret: CACHE_BUCKET
+    region: us-east-1
+    path-style: true
+    cache_key: 'lua-{{ checksum "ardumatic-dev-1.rockspec" }}-{{ checksum ".tool-versions" }}'
+    mount:
+    - .lua
+
+- name: install dependencies
+  image: code.harton.nz/james/asdf_container:latest
+  pull: "always"
+  environment:
+    LUA_DIR: /drone/src/.lua
+    LUA_BINDIR: /drone/src/.lua/bin
+    LUA_INCDIR: /drone/src/.lua/include
+    LUA_LIBDIR: /drone/src/.lua/lib
+    ASDF_DATA_DIR: /drone/src/.asdf
+    ASDF_DIR: /root/.asdf
+  depends_on:
+  - restore ASDF cache
+  - restore build cache
+  commands:
+  - asdf_install
+  - rm -rf .asdf/downloads
+  - . $ASDF_DIR/asdf.sh
+  - mkdir -p .lua/bin
+  - mkdir -p .lua/include
+  - mkdir -p .lua/lib
+  - luarocks build
+
+- name: store ASDF cache
+  image: meltwater/drone-cache
+  pull: "always"
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: SECRET_ACCESS_KEY
+    AWS_PLUGIN_PATH_STYLE: true
+  depends_on:
+  - install dependencies
+  settings:
+    rebuild: true
+    override: false
+    endpoint:
+      from_secret: S3_ENDPOINT
+    bucket:
+      from_secret: CACHE_BUCKET
+    region: us-east-1
+    path-style: true
+    cache_key: 'asdf-{{ os }}-{{ arch }}-{{ checksum ".tool-versions" }}'
+    mount:
+    - .asdf
+
+- name: store build cache
+  image: meltwater/drone-cache
+  pull: "always"
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: SECRET_ACCESS_KEY
+    AWS_PLUGIN_PATH_STYLE: true
+  depends_on:
+  - install dependencies
+  settings:
+    rebuild: true
+    override: false
+    endpoint:
+      from_secret: S3_ENDPOINT
+    bucket:
+      from_secret: CACHE_BUCKET
+    region: us-east-1
+    path-style: true
+    cache_key: 'lua-{{ checksum "ardumatic-dev-1.rockspec" }}-{{ checksum ".tool-versions" }}'
+    mount:
+    - .lua
+
+---
+
+kind: pipeline
+type: docker
+name: test
+
+depends_on:
+  - build
+
+steps:
+- name: restore ASDF cache
+  image: meltwater/drone-cache
+  pull: "always"
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: SECRET_ACCESS_KEY
+    AWS_PLUGIN_PATH_STYLE: true
+  settings:
+    restore: true
+    endpoint:
+      from_secret: S3_ENDPOINT
+    bucket:
+      from_secret: CACHE_BUCKET
+    region: us-east-1
+    path-style: true
+    cache_key: 'asdf-{{ os }}-{{ arch }}-{{ checksum ".tool-versions" }}'
+    mount:
+    - .asdf
+
+- name: restore build cache
+  image: meltwater/drone-cache
+  pull: "always"
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: SECRET_ACCESS_KEY
+    AWS_PLUGIN_PATH_STYLE: true
+  settings:
+    restore: true
+    endpoint:
+      from_secret: S3_ENDPOINT
+    bucket:
+      from_secret: CACHE_BUCKET
+    region: us-east-1
+    path-style: true
+    cache_key: 'lua-{{ checksum "ardumatic-dev-1.rockspec" }}-{{ checksum ".tool-versions" }}'
+    mount:
+    - .lua
+
+- name: luarocks lint
+  image: code.harton.nz/james/asdf_container:latest
+  pull: "always"
+  environment:
+    LUA_DIR: /drone/src/.lua
+    LUA_BINDIR: /drone/src/.lua/bin
+    LUA_INCDIR: /drone/src/.lua/include
+    LUA_LIBDIR: /drone/src/.lua/lib
+    ASDF_DATA_DIR: /drone/src/.asdf
+    ASDF_DIR: /root/.asdf
+  depends_on:
+  - restore ASDF cache
+  - restore build cache
+  commands:
+  - asdf luarocks lint ardumatic-dev-1.rockspec
+
+- name: luarocks test
+  image: code.harton.nz/james/asdf_container:latest
+  pull: "always"
+  environment:
+    LUA_DIR: /drone/src/.lua
+    LUA_BINDIR: /drone/src/.lua/bin
+    LUA_INCDIR: /drone/src/.lua/include
+    LUA_LIBDIR: /drone/src/.lua/lib
+    ASDF_DATA_DIR: /drone/src/.asdf
+    ASDF_DIR: /root/.asdf
+  depends_on:
+  - restore ASDF cache
+  - restore build cache
+  commands:
+  - asdf luarocks test

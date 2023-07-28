@@ -1,5 +1,7 @@
 # Ardumatic
 
+[![Build Status](https://drone.harton.nz/api/badges/james/ardumatic/status.svg?ref=refs/heads/main)](https://drone.harton.nz/james/ardumatic)
+
 Ardumatic is a small forward and inverse kinematics library suitable for use
 inside Ardupilot.
 
