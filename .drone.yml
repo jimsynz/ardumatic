@@ -46,7 +46,7 @@ steps:
     - .lua
 
 - name: install dependencies
-  image: code.harton.nz/james/asdf_container:latest
+  image: harton.dev/james/asdf_container:latest
   pull: "always"
   environment:
     LUA_DIR: /drone/src/.lua
@@ -168,7 +168,7 @@ steps:
     - .lua
 
 - name: luarocks lint
-  image: code.harton.nz/james/asdf_container:latest
+  image: harton.dev/james/asdf_container:latest
   pull: "always"
   environment:
     LUA_DIR: /drone/src/.lua
@@ -184,7 +184,7 @@ steps:
   - asdf luarocks lint ardumatic-dev-1.rockspec
 
 - name: luarocks test
-  image: code.harton.nz/james/asdf_container:latest
+  image: harton.dev/james/asdf_container:latest
   pull: "always"
   environment:
     LUA_DIR: /drone/src/.lua

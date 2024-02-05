@@ -2,10 +2,10 @@ rockspec_format = "3.0"
 package = "ardumatic"
 version = "dev-1"
 source = {
-  url = "https://code.harton.nz/james/ardumatic"
+  url = "https://harton.dev/james/ardumatic"
 }
 description = {
-  homepage = "https://code.harton.nz/james/ardumatic",
+  homepage = "https://harton.dev/james/ardumatic",
   license = "Hippocratic <https://firstdonoharm.dev/version/2/1/license/>"
 }
 build = {

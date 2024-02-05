@@ -2,12 +2,12 @@ version: "3"
 
 services:
   dev:
-    image: registry.code.harton.nz/james/ardumatic:dev-container
+    image: registry.harton.dev/james/ardumatic:dev-container
     build:
       context: .
       dockerfile: Dockerfile.dev
       cache_from:
-        - registry.code.harton.nz/james/ardumatic:dev-container
+        - registry.harton.dev/james/ardumatic:dev-container
       labels:
-        - "org.opencontainers.image.source=https://code.harton.nz/james/ardumatic"
+        - "org.opencontainers.image.source=https://harton.dev/james/ardumatic"
 
