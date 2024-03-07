@@ -6,7 +6,7 @@ source = {
 }
 description = {
   homepage = "https://harton.dev/james/ardumatic",
-  license = "Hippocratic <https://firstdonoharm.dev/version/2/1/license/>"
+  license = "HL3-FULL <https://firstdonoharm.dev/version/3/0/full.html/>"
 }
 build = {
   type = "builtin",
