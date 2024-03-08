@@ -28,7 +28,7 @@ This package couldn't exist without all the great people whose code I was able t
 ## Github Mirror
 
 This repository is mirrored [on Github](https://github.com/jimsynz/ardumatic)
-from it's primary location [on my Forejo instance](https://harton.dev/james/ardumatic).
+from it's primary location [on my Forgejo instance](https://harton.dev/james/ardumatic).
 Feel free to raise issues and open PRs on Github.
 
 ## License
