@@ -215,8 +215,10 @@ end
 function Vec3:angle_to(other)
   Object.assert_type(other, Vec3)
 
-  local rads = math.acos(self:dot(other))
-  print("rads = " .. tostring(rads))
+  local dot_product = self:dot(other)
+  -- Clamp dot product to [-1, 1] to avoid NaN from acos
+  dot_product = math.max(-1, math.min(1, dot_product))
+  local rads = math.acos(dot_product)
   return Angle.from_radians(rads)
 end
 
@@ -243,7 +245,22 @@ function Vec3:constrained_rotation_towards(other, constraint)
 
   else
     -- rotate towards other while applying a maximum angle constraint
-    local correction_axis = self:cross(other):normalise()
+    local correction_axis = other:cross(self)
+    
+    -- Handle the case where vectors are opposite (cross product is zero)
+    if correction_axis:length() < Scalar.FLOAT_EPSILON then
+      -- Find an arbitrary perpendicular axis
+      local arbitrary_axis
+      if math.abs(self:x()) < 0.9 then
+        arbitrary_axis = Vec3.new(1, 0, 0)
+      else
+        arbitrary_axis = Vec3.new(0, 1, 0)
+      end
+      correction_axis = self:cross(arbitrary_axis):normalise()
+    else
+      correction_axis = correction_axis:normalise()
+    end
+    
     return self:rotate_about_axis(correction_axis, constraint)
   end
 end
@@ -303,7 +320,7 @@ end
 function Vec3:project_on_plane(plane_normal)
   local b = self:normalise()
   local n = plane_normal:normalise()
-  return b:sub_vec3(n:mul_vec3(b:dot(plane_normal))):normalise()
+  return b:sub_vec3(n:mul_number(b:dot(plane_normal))):normalise()
 end
 
 return Vec3
