@@ -91,6 +91,36 @@ function Vec3.zero()
   return Vec3.new(0, 0, 0)
 end
 
+--- Create a unit vector pointing up (positive Z)
+function Vec3.up()
+  return Vec3.new(0, 0, 1)
+end
+
+--- Create a unit vector pointing down (negative Z)
+function Vec3.down()
+  return Vec3.new(0, 0, -1)
+end
+
+--- Create a unit vector pointing forward (positive X)
+function Vec3.forward()
+  return Vec3.new(1, 0, 0)
+end
+
+--- Create a unit vector pointing backward (negative X)
+function Vec3.backward()
+  return Vec3.new(-1, 0, 0)
+end
+
+--- Create a unit vector pointing right (positive Y)
+function Vec3.right()
+  return Vec3.new(0, 1, 0)
+end
+
+--- Create a unit vector pointing left (negative Y)
+function Vec3.left()
+  return Vec3.new(0, -1, 0)
+end
+
 function Vec3:x()
   return self._vector3f:x()
 end
