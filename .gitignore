@@ -2,4 +2,7 @@
 /lua
 /lua_modules
 /.luarocks
+eeprom.bin
+*.tlog
+*.BIN
 .env*

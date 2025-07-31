@@ -9,6 +9,7 @@ environment:
   LUA_BINDIR: /drone/src/.lua/bin
   LUA_INCDIR: /drone/src/.lua/include
   LUA_LIBDIR: /drone/src/.lua/lib
+  ARDUPILOT_PATH: /drone/src/ardupilot
 
 steps:
 - name: restore ASDF cache
@@ -67,12 +68,13 @@ steps:
   pull: "always"
   depends_on:
   - restore build cache
-  - install ASDF
+  - store ASDF cache
   commands:
+  - export PATH="$ASDF_DATA_DIR/shims:$PATH"
   - mkdir -p .lua/bin
   - mkdir -p .lua/include
   - mkdir -p .lua/lib
-  - asdf luarocks build
+  - luarocks build
 
 - name: store build cache
   depends_on:
@@ -95,14 +97,16 @@ steps:
   depends_on:
   - store build cache
   commands:
-  - asdf luarocks lint ardumatic-dev-1.rockspec
+  - export PATH="$ASDF_DATA_DIR/shims:$PATH"
+  - luarocks lint ardumatic-dev-1.rockspec
 
 - name: luarocks test
   image: harton.dev/james/asdf_container:latest
   depends_on:
   - store build cache
   commands:
-  - asdf luarocks test
+  - export PATH="$ASDF_DATA_DIR/shims:$PATH"
+  - luarocks test
 
 volumes:
   - name: cache

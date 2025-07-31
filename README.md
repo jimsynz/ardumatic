@@ -9,6 +9,58 @@ inside Ardupilot.
 It uses the [FABRIK](https://doi.org/10.1016/j.gmod.2011.05.003) algorithm to
 get quickly generate inverse kinematic solutions.
 
+## Testing
+
+Ardumatic includes comprehensive testing for both standalone functionality and ArduPilot integration:
+
+### Unit Tests
+```bash
+# Run Lua unit tests
+busted
+```
+
+### SITL Integration Tests
+Test the kinematic solver within ArduPilot's Software-in-the-Loop simulator:
+
+```bash
+# Run SITL integration tests
+ARDUPILOT_PATH=/path/to/ardupilot ./tools/run_sitl_tests.sh
+```
+
+For detailed SITL testing information, see [SITL_TESTING.md](SITL_TESTING.md).
+
+### All Tests
+```bash
+# Run unit tests
+busted
+
+# Run SITL integration tests
+ARDUPILOT_PATH=/path/to/ardupilot ./tools/run_sitl_tests.sh
+```
+
+## Development
+
+### Prerequisites
+- Lua 5.1+ (ArduPilot compatible)
+- Busted (for unit testing)
+- Python 3.6+ (for SITL testing)
+- ArduPilot source code (for SITL testing)
+
+### Quick Start
+```bash
+# Install dependencies
+luarocks install --deps-only
+
+# Run unit tests
+busted
+
+# Run SITL integration tests (requires ArduPilot)
+ARDUPILOT_PATH=/path/to/ardupilot ./tools/run_sitl_tests.sh
+
+# Lint code
+luacheck src/
+```
+
 # TODO
 
 - ~~Implement FABRIK solver~~
