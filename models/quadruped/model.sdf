@@ -1,0 +1,148 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="quadruped">
+    <!-- Main body -->
+    <link name="body">
+      <pose>0 0 0.12 0 0 0</pose>
+      <inertial>
+        <mass>3.0</mass>
+        <inertia>
+          <ixx>0.15</ixx>
+          <iyy>0.15</iyy>
+          <izz>0.15</izz>
+        </inertia>
+      </inertial>
+      <visual name="body_visual">
+        <geometry>
+          <box>
+            <size>0.24 0.16 0.06</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.6 0.3 0.1 1</ambient>
+          <diffuse>0.6 0.3 0.1 1</diffuse>
+        </material>
+      </visual>
+      <collision name="body_collision">
+        <geometry>
+          <box>
+            <size>0.24 0.16 0.06</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Front Right Leg -->
+    <link name="front_right_upper">
+      <pose>0.06 -0.05 0.07 0 0 0</pose>
+      <inertial>
+        <mass>0.2</mass>
+        <inertia>
+          <ixx>0.002</ixx>
+          <iyy>0.002</iyy>
+          <izz>0.002</izz>
+        </inertia>
+      </inertial>
+      <visual name="upper_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.015</radius>
+            <length>0.05</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8 0.2 0.2 1</ambient>
+          <diffuse>0.8 0.2 0.2 1</diffuse>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="front_right_shoulder" type="revolute">
+      <parent>body</parent>
+      <child>front_right_upper</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <link name="front_right_lower">
+      <pose>0.06 -0.05 0.01 0 0 0</pose>
+      <inertial>
+        <mass>0.15</mass>
+        <inertia>
+          <ixx>0.003</ixx>
+          <iyy>0.003</iyy>
+          <izz>0.003</izz>
+        </inertia>
+      </inertial>
+      <visual name="lower_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.012</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.2 0.8 0.2 1</ambient>
+          <diffuse>0.2 0.8 0.2 1</diffuse>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="front_right_elbow" type="revolute">
+      <parent>front_right_upper</parent>
+      <child>front_right_lower</child>
+      <pose>0 0 -0.025 0 0 0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <link name="front_right_foot">
+      <pose>0.06 -0.05 -0.04 0 0 0</pose>
+      <inertial>
+        <mass>0.05</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <iyy>0.001</iyy>
+          <izz>0.001</izz>
+        </inertia>
+      </inertial>
+      <visual name="foot_visual">
+        <geometry>
+          <sphere>
+            <radius>0.015</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="front_right_wrist" type="revolute">
+      <parent>front_right_lower</parent>
+      <child>front_right_foot</child>
+      <pose>0 0 -0.04 0 0 0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.5</lower>
+          <upper>0.5</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- Simplified - showing one leg, full model would have all 4 legs -->
+    
+  </model>
+</sdf>

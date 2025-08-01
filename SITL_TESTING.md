@@ -63,30 +63,61 @@ The test harness will automatically try to find ArduPilot in common locations:
 
 ### Quick Start
 
-Run SITL tests using the shell script:
+Run SITL tests using the shell scripts:
 
 ```bash
-# Run SITL tests (requires ARDUPILOT_PATH environment variable)
+# Run basic kinematic solver tests
 ARDUPILOT_PATH=/path/to/ardupilot ./tools/run_sitl_tests.sh
 
+# Run comprehensive gait generator tests
+ARDUPILOT_PATH=/path/to/ardupilot ./tools/run_gait_sitl_tests.sh
+
 # With custom timeout
-ARDUPILOT_PATH=/path/to/ardupilot TIMEOUT=60 ./tools/run_sitl_tests.sh
+ARDUPILOT_PATH=/path/to/ardupilot TIMEOUT=60 ./tools/run_gait_sitl_tests.sh
 
 # With custom speedup factor
-ARDUPILOT_PATH=/path/to/ardupilot SPEEDUP=5 ./tools/run_sitl_tests.sh
+ARDUPILOT_PATH=/path/to/ardupilot SPEEDUP=5 ./tools/run_gait_sitl_tests.sh
 ```
+
+### Test Types
+
+**Basic Kinematic Tests** (`run_sitl_tests.sh`):
+- Module loading and basic functionality
+- Vector math and object creation
+- Kinematic chain assembly
+- FABRIK solver convergence
+- Basic integration with ArduPilot
+
+**Gait Generator Tests** (`run_gait_sitl_tests.sh`):
+- Gait generator creation and configuration
+- Gait pattern switching (tripod, wave, etc.)
+- Motion command processing
+- Stability analysis integration
+- Performance monitoring
+- Real-time gait updates
 
 ## Test Structure
 
 ### What Gets Tested
 
-The SITL tests validate:
+**Basic Kinematic Tests** validate:
 
 1. **Module Loading**: All Lua modules load correctly in ArduPilot
 2. **Basic Operations**: Vector math, object creation, basic functionality
 3. **Kinematic Chain**: Link and joint creation, chain assembly
 4. **FABRIK Solver**: Inverse kinematics solving with convergence testing
 5. **Integration**: Proper interaction with ArduPilot's Lua environment
+
+**Gait Generator Tests** validate:
+
+1. **Gait System Initialization**: Robot configuration and gait generator creation
+2. **Gait Control**: Start/stop functionality and state management
+3. **Pattern Switching**: Smooth transitions between gait patterns (tripod, wave, etc.)
+4. **Motion Processing**: Velocity and turn rate command handling
+5. **Real-time Updates**: Continuous gait generation with proper timing
+6. **Configuration Management**: Parameter setting and retrieval
+7. **Stability Integration**: Stability analysis and margin calculation
+8. **Performance Monitoring**: Computation time and efficiency tracking
 
 ### Test Scenarios
 
