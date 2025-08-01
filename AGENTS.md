@@ -1,8 +1,8 @@
 # Agent Guidelines for Ardumatic
 
 ## Build/Test/Lint Commands
-- **Run all tests**: `busted`
-- **Run single test**: `busted spec/filename_spec.lua`
+- **Run all tests**: `luarocks test`
+- **Run single test**: `luarocks test spec/filename_spec.lua`
 - **Lint code**: `luacheck src/` or `luacheck filename.lua`
 - **Install dependencies**: `luarocks install --deps-only`
 
