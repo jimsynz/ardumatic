@@ -111,4 +111,4 @@ steps:
 volumes:
   - name: cache
     host:
-      path: /tmp/drone-cache
+      path: /var/tmp/drone-cache
